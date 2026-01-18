@@ -17,6 +17,8 @@ APPIMAGE_FILE="$APPIMAGE_DST/kapymine-launcher.AppImage"
 WRAPPER_SCRIPT="kapymine-launcher.sh"
 WRAPPER_DST="/usr/bin/kapymine-launcher"
 
+cp "$SCRIPT_DIR/kapymine-launcher.sh" /usr/bin/kapymine-launcher
+
 DESKTOP_TEMPLATE="kapymine-launcher.desktop"
 
 # Determine real user's home, even under sudo
