@@ -17,8 +17,6 @@ APPIMAGE_FILE="$APPIMAGE_DST/kapymine-launcher.AppImage"
 WRAPPER_SCRIPT="kapymine-launcher.sh"
 WRAPPER_DST="/usr/bin/kapymine-launcher"
 
-cp "$SCRIPT_DIR/kapymine-launcher.sh" /usr/bin/kapymine-launcher
-
 DESKTOP_TEMPLATE="kapymine-launcher.desktop"
 
 # Determine real user's home, even under sudo
@@ -30,6 +28,8 @@ if [[ $EUID -ne 0 ]]; then
   echo "🔐 Root privileges required. Asking for sudo..."
   exec sudo "$0" "$@"
 fi
+
+cp "$SCRIPT_DIR/kapymine-launcher.sh" /usr/bin/kapymine-launcher
 
 # ── Download AppImage ──────────────────────────────────────
 echo "🌐 Downloading PrismLauncher AppImage version ${pkgver}..."
