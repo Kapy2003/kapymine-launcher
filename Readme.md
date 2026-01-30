@@ -1,24 +1,44 @@
-<img src="https://raw.githubusercontent.com/Kapy2003/Kapymine-Launcher/refs/heads/main/kapymine.png" alt="Kapymine Launcher Icon" width="100" />
+<center><img src="https://raw.githubusercontent.com/Kapy2003/Kapymine-Launcher/refs/heads/main/kapymine.png" alt="Kapymine Launcher Icon" width="110" /></center>
 
-# Kapymine Launcher
-Kapymine Launcher is a simple, user-friendly Bash-based Minecraft launcher wrapper.  
-It automates:
-- Creating an offline Minecraft account.
-- Downloading and launching the latest vanilla Minecraft release.
-- Managing multiple installed versions.
-- Providing a clean graphical interface via Zenity.
+# 🎮 Kapymine Launcher
 
-> **Note:** This project is intended for educational and personal use.  
+**A fast, minimal, Bash-based Minecraft launcher wrapper for Linux power users.**
+
+Kapymine Launcher is a **high-performance Minecraft launcher wrapper written entirely in Bash**, built for users who want a **clean, no-bloat, OG Linux experience**.
+It is optimized for **Arch Linux**, **Hyprland**, and lightweight desktop environments.
+
+Designed with simplicity and speed in mind — no Electron, no telemetry, just pure shell.
+
+---
+
+## ✨ Why Kapymine?
+
+🚀 **Lightning-fast & lightweight**
+Built using Bash + Yad, Kapymine runs instantly and consumes almost no system resources.
+
+🎨 **Custom Yad UI (Zenity → Yad upgrade)**
+A modern, color-coded interface for better UX:
+
+* 🟢 **Play** button — Emerald Green `#27ae60`
+* 🔵 **Install** button — Belize Blue `#2980b9`
+
+🧠 **Beginner-friendly, power-user approved**
+Perfect for Linux newbies who want things to *just work*, while still respecting the Linux philosophy.
+
+📺 **Made for the Linux community**
+Created with **Mrwho hq** viewers in mind — clean tools, no nonsense.
 
 ---
 
 ## 🚀 Features
 
-✅ Automatically fetches the latest Minecraft version from [PrismLauncher By Diegiwg](https://github.com/Diegiwg/PrismLauncher-Cracked)<br>
-✅ Creates PrismLauncher-compatible instances  
-✅ Offline account setup for quick testing  
-✅ Zenity-based graphical menus:<br>
-✅ Supports uninstall via a dedicated script  
+✅ Auto-creates **offline Minecraft accounts** (PrismLauncher compatible)<br>
+✅ Automatically fetches the **latest vanilla Minecraft version** from Mojang’s official manifest<br>
+✅ Auto-generates and manages **multiple Minecraft instances**<br>
+✅ Clean **Yad-based GUI** with color-coded actions<br>
+✅ Fully **PrismLauncher-compatible instance structure**<br>
+✅ Simple install & uninstall scripts<br>
+✅ No background services, no tracking, no bloat<br>
 
 ---
 
@@ -26,41 +46,69 @@ It automates:
 
 ```
 Kapymine-Launcher/
-├── kapymine-launcher.sh # Main launcher script
-├── uninstall.sh # Uninstaller script
-├── install.sh # Installer script
-├── kapymine.png # Icon
-└── README.md # This file
+├── kapymine-launcher.sh   # Main launcher script
+├── install.sh             # Installer script
+├── uninstall.sh           # Uninstaller script
+├── kapymine.png           # Application icon
+└── README.md              # Documentation
 ```
+
+---
+
+## 🧩 Dependencies
+
+* `jq` – JSON parsing
+* `yad` – GUI dialogs
+* `uuidgen` – Instance identifiers
 
 ---
 
 ## 💻 Installation
 
-1. **Installation**
+### 🟦 Arch Linux / Arch-based Distros
 
 ```bash
-pacman -S --needed git base-devel
-git clone https://github.com/Kapy2003/kapymine-launcher.git --depth 1
-cd kapymine-launcher
+sudo pacman -S --needed git jq yad util-linux
+git clone https://github.com/Kapy2003/Kapymine-Launcher.git --depth 1
+cd Kapymine-Launcher
 ./install.sh && exit
 ```
 
-2. **Uninstallation**
+### 🟩 Debian / Ubuntu-based Distros
 
 ```bash
-cd kapymine-launcher
+sudo apt update
+sudo apt install git jq yad uuid-runtime
+git clone https://github.com/Kapy2003/Kapymine-Launcher.git --depth 1
+cd Kapymine-Launcher
+./install.sh
+```
+
+---
+
+## 🗑️ Uninstallation
+
+```bash
+cd Kapymine-Launcher
 ./uninstall.sh
 ```
 
-3. **Dependencies**
+---
 
-#### Arch:
-```bash
-sudo pacman -S jq zenity
-```
+## ⚠️ Disclaimer
 
-#### Debian/Ubuntu:
-```bash
-sudo apt install jq zenity
-```
+> **This project is intended for educational and personal use only.**
+> Kapymine Launcher is not affiliated with Mojang or Microsoft.
+> Users are responsible for complying with Minecraft’s EULA.
+
+---
+
+## ❤️ Credits
+
+* Mojang — Minecraft & version manifests
+* PrismLauncher — instance structure inspiration
+* Linux community — for keeping things clean & fast
+
+---
+
+**Kapymine Launcher — Minecraft, the Linux way.** 🐧🎮
