@@ -4,165 +4,78 @@
 PRISM_APPIMAGE="/usr/share/kapymine-launcher/kapymine-launcher.AppImage"
 INSTANCES_DIR="$HOME/.local/share/PrismLauncher/instances"
 ACCOUNTS_FILE="$HOME/.local/share/PrismLauncher/accounts.json"
-PRISM_CONF="$HOME/.local/share/PrismLauncher/prismlauncher.cfg"
 
 # ─── Dependencies Check ───────────────────────────────────
-for cmd in zenity jq uuidgen; do
-  command -v "$cmd" >/dev/null || {
-    zenity --error --text="Missing dependency: $cmd"
-    exit 1
-  }
+for cmd in yad jq uuidgen; do
+  command -v "$cmd" >/dev/null || { echo "Missing: $cmd"; exit 1; }
 done
-
-# ─── Offline Account Setup ────────────────────────
-if [ ! -f "$ACCOUNTS_FILE" ] || ! jq -e '.accounts | length > 0' "$ACCOUNTS_FILE" &>/dev/null; then
-  username=$(zenity --entry \
-    --title="Create Offline Account" \
-    --text="Enter a Minecraft username:")
-
-  if [[ $? -ne 0 || -z "$username" ]]; then
-    echo "User cancelled account creation or entered nothing."
-    exit 0
-  fi
-
-  uuid=$(echo -n "OfflinePlayer:$username" | md5sum | cut -d' ' -f1)
-  client_token=$(uuidgen | tr -d '-')
-  iat=$(date +%s)
-
-  new_account=$(jq -n \
-    --arg uuid "$uuid" \
-    --arg username "$username" \
-    --arg ctoken "$client_token" \
-    --argjson iat "$iat" \
-    '{
-      active: true,
-      profile: {
-        capes: [],
-        id: $uuid,
-        name: $username,
-        skin: { id: "", url: "", variant: "" }
-      },
-      type: "Offline",
-      ygg: {
-        extra: { clientToken: $ctoken, userName: $username },
-        iat: $iat,
-        token: "0"
-      }
-    }')
-
-  mkdir -p "$(dirname "$ACCOUNTS_FILE")"
-  [[ ! -s "$ACCOUNTS_FILE" ]] && echo '{"accounts":[],"formatVersion":3}' > "$ACCOUNTS_FILE"
-
-  tmp=$(mktemp)
-  jq '.accounts |= map(.active = false)' "$ACCOUNTS_FILE" > "$tmp" && mv "$tmp" "$ACCOUNTS_FILE"
-
-  tmp=$(mktemp)
-  jq --argjson new "$new_account" '.accounts += [$new]' "$ACCOUNTS_FILE" > "$tmp" && mv "$tmp" "$ACCOUNTS_FILE"
-fi
 
 # ─── Main Menu ────────────────────────────────────
 while true; do
-  mapfile -t versions < <(
-    find "$INSTANCES_DIR" -mindepth 1 -maxdepth 1 -type d -not -name '.*' -printf "%f\n"
-  )
+  mapfile -t versions < <(find "$INSTANCES_DIR" -mindepth 1 -maxdepth 1 -type d -not -name '.*' -printf "%f\n" 2>/dev/null)
 
-  #if [ ${#versions[@]} -eq 0 ]; then
-  #  zenity --info --title="No Versions Found" \
-  #    --text="No Minecraft versions found in:\n$INSTANCES_DIR\n\nOpening Prism Launcher..."
-  #  "$PRISM_APPIMAGE" &
-  #  inotifywait -e create -m "$INSTANCES_DIR" |
-  #  while read -r _ _ file; do
-  #    [ -d "$INSTANCES_DIR/$file" ] && break
-  #  done
-  #  exit 0
-  #fi
-
-# ─── Vanilla Instance Build ────────────────────────────────────
-
-if [ ${#versions[@]} -eq 0 ]; then
-  latest_version=$(curl -s https://piston-meta.mojang.com/mc/game/version_manifest_v2.json | jq -r '.latest.release')
-
-  if [ -z "$latest_version" ]; then
-    exit 1
-  fi
-
-  instance_dir="$INSTANCES_DIR/$latest_version-latest"
-  mkdir -p "$instance_dir"
-
-  # Create prismlauncher.cfg if not exists
-  if [ ! -f "$PRISM_CONF" ]; then
-    cat > "$PRISM_CONF" <<EOF
-[General]
-BackgroundCat=teawie
-CloseAfterLaunch=true
-TheCat=true
-ToolbarsLocked=true
-StatusBarVisible=false
-ApplicationTheme=dark
-IconTheme=pe_colored
-Language=en_US
-QuitAfterGameStop=true
-EOF
-  fi
-
-  # Create instance.cfg
-  cat > "$instance_dir/instance.cfg" <<EOF
-InstanceType=OneSix
-iconkey=default
-IntendedVersion=$latest_version
-name=$latest_version
-EOF
-
-  # Create mmc-pack.json
-  cat > "$instance_dir/mmc-pack.json" <<EOF
-{
-  "components": [
-    {
-      "cachedName": "Minecraft",
-      "cachedRequires": [
-        {
-          "suggests": "3.3.3",
-          "uid": "org.lwjgl3"
-        }
-      ],
-      "cachedVersion": "$latest_version",
-      "important": true,
-      "uid": "net.minecraft",
-      "version": "$latest_version"
+  # ─── THE STYLE FIX ──────────────────────────────────────
+  # 1. We match the Dark Theme (Adwaita:dark).
+  # 2. We target the button container (.dialog-action-area) to force colors.
+  
+  STYLE_CSS="
+    /* Reset all buttons to look clean */
+    button {
+        border-radius: 6px;
+        border: 1px solid rgba(255,255,255,0.1);
+        font-weight: bold;
     }
-  ],
-  "formatVersion": 1
-}
-EOF
-fi
+    
+    /* Play Button (1st in row) - Emerald Green */
+    .dialog-action-area button:nth-child(1) {
+        background-image: none !important;
+        background-color: #27ae60 !important;
+        color: white !important;
+    }
+    
+    /* Install Button (2nd in row) - Belize Blue */
+    .dialog-action-area button:nth-child(2) {
+        background-image: none !important;
+        background-color: #2980b9 !important;
+        color: white !important;
+    }
+    
+    /* Hover Effects */
+    .dialog-action-area button:nth-child(1):hover { background-color: #2ecc71 !important; }
+    .dialog-action-area button:nth-child(2):hover { background-color: #3498db !important; }
+  "
 
-# ─── User Input ────────────────────────────────────────────────
-  action=$(zenity --question \
+  # ─── RUN YAD ────────────────────────────────────────────
+  # We use 'Adwaita:dark' to match your system vibe but allow our CSS edits.
+  
+  GTK_THEME=Adwaita:dark yad --question \
     --title="Minecraft Launcher" \
-    --text="Choose what to do:" \
-    --ok-label="Play / Select Version" \
-    --cancel-label="Cancel" \
-    --extra-button="Install New Version")
+    --text="<span size='large' weight='bold'>Ready to play?</span>\nChoose an action below:" \
+    --button="🟢 Play / Select:0" \
+    --button="📥 Install New:2" \
+    --button="❌ Cancel:1" \
+    --center --width=400 --borders=20 \
+    --gtk-css="$STYLE_CSS"
 
   response=$?
 
-  if [[ "$action" == "Install New Version" ]]; then
+  if [[ $response -eq 2 ]]; then
     "$PRISM_APPIMAGE" &
     break
   elif [[ $response -eq 0 ]]; then
-    mapfile -t versions < <(
-      find "$INSTANCES_DIR" -mindepth 1 -maxdepth 1 -type d -not -name '.*' -printf "%f\n"
-    )
-
-    selected_version=$(zenity --list \
+    selected_version=$(GTK_THEME=Adwaita:dark yad --list \
       --title="Choose Minecraft Version" \
       --column="Available Versions" "${versions[@]}" \
-      --height=10 --width=10)
+      --height=450 --width=350 --center \
+      --button="🟢 Launch:0" \
+      --button="❌ Cancel:1" \
+      --gtk-css="treeview:selected { background-color: #27ae60 !important; color: white !important; }")
 
-    [ -n "$selected_version" ] && exec "$PRISM_APPIMAGE" -l "$selected_version"
+    if [ -n "$selected_version" ]; then
+        clean_version=$(echo "$selected_version" | cut -d'|' -f1)
+        exec "$PRISM_APPIMAGE" -l "$clean_version"
+    fi
   else
     break
   fi
-
 done
-
