@@ -37,7 +37,19 @@ Kapymine-Launcher/
 
 ## 💻 Installation
 
-1. **Installation**
+1. **Dependencies**
+
+#### Arch:
+```bash
+sudo pacman -S jq zenity
+```
+
+#### Debian/Ubuntu:
+```bash
+sudo apt install jq zenity
+```
+
+2. **Installation**
 
 ```bash
 pacman -S --needed git base-devel
@@ -53,14 +65,4 @@ cd kapymine-launcher
 ./uninstall.sh
 ```
 
-3. **Dependencies**
 
-#### Arch:
-```bash
-sudo pacman -S jq zenity
-```
-
-#### Debian/Ubuntu:
-```bash
-sudo apt install jq zenity
-```
